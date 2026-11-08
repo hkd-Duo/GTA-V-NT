@@ -33,7 +33,8 @@ GTA-V-NT/
 ├── translation/
 │   └── translation.ini          ← 简体中文翻译文件(UTF-8)
 ├── tools/
-│   └── gen_translation.py       ← 翻译生成脚本(键值表内嵌,可自定义后重跑)
+│   ├── gen_translation.py       ← 翻译生成脚本(键值表内嵌,可自定义后重跑)
+│   └── patch_menu_titles.py     ← 菜单标题栏汉化补丁(见 FAQ,可选)
 └── screenshots/                 ← 游戏内汉化效果截图
 ```
 
@@ -95,6 +96,16 @@ GTA-V-NT/
 **Q:部分菜单条目还是英文?**
 `translation.ini` 缺少该键,ENT 会回退英文。若因 ENT 升级新增了条目,可手动在 ini 对应 Section 补一行 `键名=中文`,格式与现有行一致即可。
 
+**Q:装了汉化后,二级/三级菜单的"标题栏"(如 Bodyguard Options)还是英文?**
+这是 ENT 上游的已知缺陷:菜单**条目**都走翻译系统(装了 translation.ini 即中文),但子菜单**标题栏**在源码里是硬编码英文字符串(`const std::string caption = "Bodyguard Options";`),根本不经过 `tr()`,translation.ini 无法翻译。本仓库提供二进制补丁一步解决:
+
+```
+# 先完全退出游戏,然后(需要 Python 3):
+python tools/patch_menu_titles.py "<GTA5增强版根目录>\EnhancedNativeTrainer.asi"
+```
+
+补丁自动备份原文件为 `.bak-时间戳`;共汉化 **50 个**二级/三级菜单标题(玩家选项、保镖选项、载具选项、武器选项、世界选项、时间选项、杂项选项、对象放置、修改器选项及各自的三级子页);只把英文原文字节等长替换为 UTF-8 中文(NUL 填充),不改任何逻辑;不匹配的字符串会自动跳过,不会损坏文件。还原:删除补丁后的 asi,把 `.bak` 改回原名即可。
+
 **Q:想恢复默认/重置 ENT 设置?**
 在游戏根目录新建**空文件** `ENT-RESET`,下次启动 ENT 会重置全部配置。
 
@@ -103,12 +114,11 @@ GTA-V-NT/
 
 ## 📸 汉化效果截图
 
-<!-- 在游戏内按 F12 截图,把图片放进 screenshots/ 后取消下面注释
-![主菜单](screenshots/main-menu.png)
-![玩家菜单](screenshots/player-menu.png)
-![杂项菜单](screenshots/misc-menu.png)
-![载具菜单](screenshots/vehicle-menu.png)
--->
+![主菜单](screenshots/main-menu.jpg)
+![保镖菜单(条目已中文)](screenshots/bodyguard-submenu.jpg)
+![载具菜单(条目已中文)](screenshots/vehicle-submenu.jpg)
+
+> 截图为 58.0-hotfix + translation.ini 的实际效果:主菜单与全部菜单条目均为简体中文;截图中的英文标题栏(Bodyguard / Vehicle Options)可用 `tools/patch_menu_titles.py` 一并汉化。
 
 ## 🛠 自定义 / 二次翻译
 
